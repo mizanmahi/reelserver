@@ -1,14 +1,15 @@
 model Video {
-    id           String       @id @default(cuid())
-    url          String
-    title        String
-    description  String
-    thumbnailUrl String
-    viewCount    Int          @default(0)
-    likeCount    Int          @default(0)
-    uploadedBy   String
-    user         User         @relation(fields: [uploadedBy], references: [id])
-    createdAt    DateTime     @default(now())
-    updatedAt    DateTime     @updatedAt
-    engagements  Engagement[]
+    id          String       @id @default(cuid())
+    videoUrl    String
+    title       String
+    description String
+    thumbnail   String
+    uploaderId  String
+    uploader    User         @relation(fields: [uploaderId], references: [id])
+    viewCount   Int          @default(0)
+    likeCount   Int          @default(0)
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+    metadata    Json?
+    Engagement  Engagement[]
 }

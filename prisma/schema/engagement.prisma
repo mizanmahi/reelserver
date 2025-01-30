@@ -1,0 +1,9 @@
+model Engagement {
+    videoId   String
+    userId    String
+    video     Video    @relation(fields: [videoId], references: [id])
+    user      User     @relation(fields: [userId], references: [id])
+    createdAt DateTime @default(now())
+
+    @@id([videoId, userId])
+}

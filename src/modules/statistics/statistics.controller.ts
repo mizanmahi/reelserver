@@ -1,21 +1,21 @@
 import { Request, Response } from 'express';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
-import { AnalyticsService } from './statistics.service';
+import { StatisticService } from './statistics.service';
 
-const myProfileAnalytics = catchAsync(async (req: Request, res: Response) => {
-   const result = await AnalyticsService.myProfileAnalytics(
+const myProfileStatistics = catchAsync(async (req: Request, res: Response) => {
+   const result = await StatisticService.myProfileStatistics(
       req.user,
       req.query
    );
    sendResponse(res, {
       statusCode: 201,
       success: true,
-      message: 'Analytics retrieved successfully',
+      message: 'Statistics retrieved successfully',
       data: result,
    });
 });
 
-export const AnalyticsController = {
-   myProfileAnalytics,
+export const StatisticsController = {
+   myProfileStatistics,
 };

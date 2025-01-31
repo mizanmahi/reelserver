@@ -1,9 +1,9 @@
 import express from 'express';
 import { auth } from '../../middlewares/auth';
-import { AnalyticsController } from './statistics.controller';
+import { StatisticsController } from './statistics.controller';
 
 const router = express.Router();
 
-router.get('/', auth, AnalyticsController.myProfileAnalytics);
+router.get('/', auth, StatisticsController.myProfileStatistics);
 
-export const analyticsRoutes = router;
+export const statisticsRoutes = router;

@@ -68,18 +68,18 @@ services:
       networks:
          - app-network
 
-   grafana:
-      image: grafana/grafana:latest
-      container_name: grafana
-      restart: always
-      ports:
-         - '3000:3000'
-      volumes:
-         - grafana_data:/var/lib/grafana
-      networks:
-         - app-network
-      depends_on:
-         - prometheus
+   # grafana:
+   #    image: grafana/grafana:latest
+   #    container_name: grafana
+   #    restart: always
+   #    ports:
+   #       - '3000:3000'
+   #    volumes:
+   #       - grafana_data:/var/lib/grafana
+   #    networks:
+   #       - app-network
+   #    depends_on:
+   #       - prometheus
 
    application:
       build: .
@@ -114,4 +114,4 @@ networks:
 volumes:
    postgres_data:
    minio_data:
-   grafana_data:
+   # grafana_data:

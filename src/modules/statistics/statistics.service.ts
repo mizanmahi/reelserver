@@ -2,7 +2,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import { prisma } from '../../database/database';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const myProfileAnalytics = async (
+const myProfileStatistics = async (
    authUser: JwtPayload,
    query: Record<string, unknown>
    // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -36,6 +36,6 @@ const myProfileAnalytics = async (
    };
 };
 
-export const AnalyticsService = {
-   myProfileAnalytics,
+export const StatisticService = {
+   myProfileStatistics,
 };

@@ -12,6 +12,7 @@ const uploadVideo = async (
    user: JwtPayload
 ): Promise<Video> => {
    const { title, description } = payload;
+   console.log({ file });
 
    try {
       // Process video and thumbnail

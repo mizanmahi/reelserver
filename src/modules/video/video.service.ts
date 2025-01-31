@@ -1,7 +1,6 @@
 import { Video } from '@prisma/client';
-import minioClient, { bucketName } from '../../clients/minioClient';
 import { File, IVideoPayload } from './video.interface';
-import { generateVideoThumbnail } from './video.utils';
+import { processVideoUpload } from './video.utils';
 import { JwtPayload } from 'jsonwebtoken';
 import redis from '../../clients/redisClient';
 
@@ -9,45 +8,37 @@ import { prisma } from '../../database/database';
 
 const uploadVideo = async (
    file: File,
-   data: IVideoPayload,
-   authUser: JwtPayload
+   payload: IVideoPayload,
+   user: JwtPayload
 ): Promise<Video> => {
-   const { title, description } = data;
-
-   const videoName = `videos/${Date.now()}_${file.originalname}`;
-   const thumbnailName = `thumbnails/${Date.now()}_thumbnail.png`;
+   const { title, description } = payload;
 
    try {
-      const uploadedData = await minioClient.putObject(
-         bucketName,
-         videoName,
-         file.buffer
+      // Process video and thumbnail
+      const { videoUrl, thumbnailUrl } = await processVideoUpload(
+         file.buffer,
+         file.originalname,
+         process.env.MINIO_BUCKET_NAME as string
       );
-      console.log('Video uploaded:', uploadedData);
 
-      const thumbnailBuffer = await generateVideoThumbnail(file.buffer);
-      console.log('Thumbnail generated successfully');
+      console.log('Video URL:', videoUrl);
+      console.log('Thumbnail URL:', thumbnailUrl);
 
-      await minioClient.putObject(bucketName, thumbnailName, thumbnailBuffer);
-
-      const videoPublicUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${videoName}`;
-      const thumbnailUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${thumbnailName}`;
-      console.log('Video public URL:', videoPublicUrl);
-
-      const result = await prisma.video.create({
+      // Store video metadata in the database
+      const videoRecord = await prisma.video.create({
          data: {
             title,
             description,
-            videoUrl: videoPublicUrl,
+            videoUrl,
             thumbnail: thumbnailUrl,
-            uploaderId: authUser.id,
+            uploaderId: user.id,
          },
       });
 
-      return result;
+      return videoRecord;
    } catch (error) {
-      console.error('Error uploading video and thumbnail:', error);
-      throw new Error('Error uploading video and thumbnail');
+      console.error('Video upload failed:', error);
+      throw new Error('Failed to upload video and thumbnail');
    }
 };
 

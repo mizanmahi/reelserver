@@ -16,11 +16,12 @@ const uploadVideo = async (
 
    try {
       // Process video and thumbnail
-      const { videoUrl, thumbnailUrl } = await processVideoUpload(
-         file.buffer,
-         file.originalname,
-         process.env.MINIO_BUCKET_NAME as string
-      );
+      const { compressedVideoUrl: videoUrl, thumbnailUrl } =
+         await processVideoUpload(
+            file.buffer,
+            file.originalname,
+            process.env.MINIO_BUCKET_NAME as string
+         );
 
       // const videoMetaData = await getVideoMetadata(file.buffer);
 

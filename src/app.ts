@@ -3,12 +3,12 @@ import express, { Application, Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 import { videoRoutes } from './modules/video/video.routes';
 import { authRoutes } from './modules/auth/auth.routes';
-import globalExceptionHandler from './middlewares/globalExceptionHandler';
+import globalErrorHandler from './middlewares/globalErrorHandler';
 import { analyticsRoutes } from './modules/analytics/analytics.routes';
-import logRequest from './middlewares/loggerMiddleware';
+import logRequest from './middlewares/logger';
 import { limiter } from './middlewares/rateLimiter';
 import { register } from './clients/promClient';
-import { trackHttpMetrics } from './middlewares/metricsMiddleware';
+import { trackHttpMetrics } from './middlewares/metrics';
 
 const app: Application = express();
 
@@ -25,7 +25,7 @@ app.use(trackHttpMetrics);
 app.use('/api/v1/video', videoRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
-app.get('/metrics', async (req, res) => {
+app.get('/metrics', async (_req, res) => {
    res.set('Content-Type', register.contentType);
    res.end(await register.metrics());
 });
@@ -37,7 +37,7 @@ app.get('/', async (req: Request, res: Response) => {
    });
 });
 
-app.use(globalExceptionHandler);
+app.use(globalErrorHandler);
 
 app.use((req: Request, res: Response) => {
    console.log(req.originalUrl);

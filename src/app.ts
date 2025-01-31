@@ -7,6 +7,8 @@ import globalExceptionHandler from './middlewares/globalExceptionHandler';
 import { analyticsRoutes } from './modules/analytics/analytics.routes';
 import logRequest from './middlewares/loggerMiddleware';
 import { limiter } from './middlewares/rateLimiter';
+import { register } from './clients/promClient';
+import { trackHttpMetrics } from './middlewares/metricsMiddleware';
 
 const app: Application = express();
 
@@ -18,10 +20,15 @@ app.use(cookieParser());
 app.use(logRequest);
 // user rate limiter to all the routes starting with /api/v1
 app.use('/api/v1', limiter);
+app.use(trackHttpMetrics);
 
 app.use('/api/v1/video', videoRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
+app.get('/metrics', async (req, res) => {
+   res.set('Content-Type', register.contentType);
+   res.end(await register.metrics());
+});
 
 app.get('/', async (req: Request, res: Response) => {
    res.status(200).json({

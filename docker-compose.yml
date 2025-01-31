@@ -57,6 +57,30 @@ services:
          timeout: 5s
          retries: 5
 
+   prometheus:
+      image: prom/prometheus:latest
+      container_name: prometheus
+      restart: always
+      volumes:
+         - ./prometheus.yml:/etc/prometheus/prometheus.yml # need to match the path of the prometheus.yml file for scraping
+      ports:
+         - '9090:9090'
+      networks:
+         - app-network
+
+   grafana:
+      image: grafana/grafana:latest
+      container_name: grafana
+      restart: always
+      ports:
+         - '3000:3000'
+      volumes:
+         - grafana_data:/var/lib/grafana
+      networks:
+         - app-network
+      depends_on:
+         - prometheus
+
    application:
       build: .
       container_name: reelserver
@@ -67,6 +91,8 @@ services:
             condition: service_healthy
          redis-stack:
             condition: service_healthy
+         prometheus:
+            condition: service_started
       environment:
          DATABASE_URL: 'postgresql://postgres:541990@postgres:5432/reelsdb?schema=public'
          MINIO_ROOT_USER: 'mizan'
@@ -88,3 +114,4 @@ networks:
 volumes:
    postgres_data:
    minio_data:
+   grafana_data:

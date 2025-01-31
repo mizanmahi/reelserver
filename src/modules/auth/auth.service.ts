@@ -1,5 +1,4 @@
 import { User } from '@prisma/client';
-import prisma from '../../utils/prismaClient';
 import ApiError from '../../errors/ApiError';
 import { comparePasswords, hashedPassword } from './auth.utils';
 import { StatusCodes } from 'http-status-codes';
@@ -11,6 +10,7 @@ import {
 } from './auth.interface';
 import config from '../../config/config';
 import { JwtPayload, Secret } from 'jsonwebtoken';
+import { prisma } from '../../database/database';
 
 const registerUser = async (payload: User): Promise<Partial<User>> => {
    const existingUser = await prisma.user.findUnique({

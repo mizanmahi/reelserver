@@ -19,16 +19,16 @@ router.post(
 );
 
 router.post(
-   '/refresh-token',
-   validate(AuthValidationSchemas.jwtTokenSchema),
-   AuthController.refreshToken
-);
-
-router.post(
    '/change-password',
    validate(AuthValidationSchemas.changePasswordSchema),
    auth,
    AuthController.changePassword
+);
+
+router.post(
+   '/refresh-token',
+   validate(AuthValidationSchemas.jwtTokenSchema),
+   AuthController.refreshToken
 );
 
 export const authRoutes = router;

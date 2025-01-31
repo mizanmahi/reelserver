@@ -1,16 +1,16 @@
 import { Server } from 'http';
 import { PrismaClient } from '@prisma/client';
 import app from './app';
+import env from './config/config';
 import logger from './logger/logger';
 import { establishDatabaseConnection } from './database/database';
-import config from './config/config';
 
 const prisma = new PrismaClient();
 let server: Server;
 
 async function startServer() {
    return new Promise<Server>((resolve, reject) => {
-      server = app.listen(config.port, () => {
+      server = app.listen(env.port, () => {
          logger.info(
             `🚀 Application is running on http://localhost:${env.port}`
          );

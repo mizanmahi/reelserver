@@ -1,5 +1,5 @@
 import { User } from '@prisma/client';
-import ApiError from '../../errors/ApiError';
+import HttpError from '../../errorHandlers/HttpError';
 import { comparePasswords, hashedPassword } from './auth.utils';
 import { StatusCodes } from 'http-status-codes';
 import { jwtHelpers } from '../../utils/jwtHelper';
@@ -20,7 +20,7 @@ const registerUser = async (payload: User): Promise<Partial<User>> => {
    });
 
    if (existingUser)
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Email already in use!');
+      throw new HttpError(StatusCodes.BAD_REQUEST, 'Email already in use!');
 
    payload.password = await hashedPassword(payload.password);
 
@@ -48,11 +48,11 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
    });
 
    if (!user)
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Invalid credentials!');
+      throw new HttpError(StatusCodes.BAD_REQUEST, 'Invalid credentials!');
 
    const isPasswordValid = await comparePasswords(password, user.password);
    if (!isPasswordValid)
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'Wrong password!');
+      throw new HttpError(StatusCodes.BAD_REQUEST, 'Wrong password!');
 
    const accessToken = jwtHelpers.createToken(
       { id: user.id, email: user.email },
@@ -81,7 +81,7 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
       );
       //   eslint-disable-next-line @typescript-eslint/no-unused-vars
    } catch (err) {
-      throw new ApiError(StatusCodes.FORBIDDEN, 'Invalid refresh token');
+      throw new HttpError(StatusCodes.FORBIDDEN, 'Invalid refresh token');
    }
 
    const { id } = verifiedToken;
@@ -96,7 +96,7 @@ const refreshToken = async (token: string): Promise<IRefreshTokenResponse> => {
       },
    });
    if (!isUserExist) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'User not found');
+      throw new HttpError(StatusCodes.NOT_FOUND, 'User not found');
    }
 
    const newToken = jwtHelpers.createToken(

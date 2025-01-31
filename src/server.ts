@@ -1,7 +1,7 @@
 import { Server } from 'http';
 import { PrismaClient } from '@prisma/client';
 import app from './app';
-import env from './config/config';
+import config from './config/config';
 import logger from './logger/logger';
 import { establishDatabaseConnection } from './database/database';
 
@@ -10,9 +10,9 @@ let server: Server;
 
 async function startServer() {
    return new Promise<Server>((resolve, reject) => {
-      server = app.listen(env.port, () => {
+      server = app.listen(config.port, () => {
          logger.info(
-            `🚀 Application is running on http://localhost:${env.port}`
+            `🚀 Application is running on http://localhost:${config.port}`
          );
          resolve(server);
       });

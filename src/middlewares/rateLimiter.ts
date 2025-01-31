@@ -1,6 +1,6 @@
 import { rateLimit } from 'express-rate-limit';
 import { RedisStore } from 'rate-limit-redis';
-import redis from '../utils/redisClient';
+import redis from '../clients/redis';
 
 // this is a rate limiter middleware that limits the number of requests from a single IP address
 // Fixed Window Counter Rate Limiter

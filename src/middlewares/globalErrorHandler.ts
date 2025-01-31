@@ -3,10 +3,10 @@
 import { Prisma } from '@prisma/client';
 import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
 import { ZodError } from 'zod';
-import ApiError from '../errors/ApiError';
-import handlePrismaClientKnownRequestError from '../errors/handlePrismaClientKnownRequestError';
-import handlePrismaValidationError from '../errors/handlePrismaValidationError';
-import handleZodError from '../errors/handleZodError';
+import HttpError from '../errorHandlers/HttpError';
+import handleZodError from '../errorHandlers/handleZodError';
+import handlePrismaClientKnownRequestError from '../errorHandlers/handlePrismaClientKnownRequestError';
+import handlePrismaValidationError from '../errorHandlers/handlePrismaValidationError';
 
 const globalExceptionHandler: ErrorRequestHandler = (
    error,
@@ -37,7 +37,7 @@ const globalExceptionHandler: ErrorRequestHandler = (
       statusCode = simplifiedError.statusCode;
       message = simplifiedError.message;
       errorMessages = simplifiedError.errorMessages;
-   } else if (error instanceof ApiError) {
+   } else if (error instanceof HttpError) {
       statusCode = error?.statusCode;
       message = error?.message;
       errorMessages = error?.message

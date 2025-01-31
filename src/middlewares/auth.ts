@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../utils/catchAsync';
-import ApiError from '../errors/ApiError';
+import HttpError from '../errorHandlers/HttpError';
 import env from '../config/config';
 import { prisma } from '../database/database';
 
@@ -11,7 +11,7 @@ export const auth = catchAsync(
       const token = req.headers.authorization?.split(' ')[1];
       if (!token)
          return next(
-            new ApiError(StatusCodes.UNAUTHORIZED, 'You are not authorized!')
+            new HttpError(StatusCodes.UNAUTHORIZED, 'You are not authorized!')
          );
 
       let decodedData: JwtPayload;
@@ -21,7 +21,9 @@ export const auth = catchAsync(
             env.jwt.secret as string
          ) as JwtPayload;
       } catch {
-         return next(new ApiError(StatusCodes.UNAUTHORIZED, 'Invalid  token!'));
+         return next(
+            new HttpError(StatusCodes.UNAUTHORIZED, 'Invalid  token!')
+         );
       }
 
       const user = await prisma.user.findUnique({
@@ -30,7 +32,7 @@ export const auth = catchAsync(
       });
 
       if (!user)
-         return next(new ApiError(StatusCodes.NOT_FOUND, 'User not found'));
+         return next(new HttpError(StatusCodes.NOT_FOUND, 'User not found'));
 
       req.user = decodedData;
       next();

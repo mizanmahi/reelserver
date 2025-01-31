@@ -1,9 +1,9 @@
 import { Video } from '@prisma/client';
-import minioClient, { bucketName } from '../../utils/minioClient';
+import minioClient, { bucketName } from '../../clients/minioClient';
 import { File, IVideoPayload } from './video.interface';
 import { generateVideoThumbnail } from './video.utils';
 import { JwtPayload } from 'jsonwebtoken';
-import redis from '../../utils/redisClient';
+import redis from '../../clients/redisClient';
 
 import { prisma } from '../../database/database';
 
@@ -14,29 +14,24 @@ const uploadVideo = async (
 ): Promise<Video> => {
    const { title, description } = data;
 
-   const videoFileName = `videos/${Date.now()}_${file.originalname}`;
-   const thumbnailFileName = `thumbnails/${Date.now()}_thumbnail.png`;
+   const videoName = `videos/${Date.now()}_${file.originalname}`;
+   const thumbnailName = `thumbnails/${Date.now()}_thumbnail.png`;
 
    try {
       const uploadedData = await minioClient.putObject(
          bucketName,
-         videoFileName,
+         videoName,
          file.buffer
       );
-      console.log('Video uploaded successfully:', uploadedData);
+      console.log('Video uploaded:', uploadedData);
 
       const thumbnailBuffer = await generateVideoThumbnail(file.buffer);
       console.log('Thumbnail generated successfully');
 
-      await minioClient.putObject(
-         bucketName,
-         thumbnailFileName,
-         thumbnailBuffer
-      );
-      console.log('Thumbnail uploaded successfully');
+      await minioClient.putObject(bucketName, thumbnailName, thumbnailBuffer);
 
-      const videoPublicUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${videoFileName}`;
-      const thumbnailUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${thumbnailFileName}`;
+      const videoPublicUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${videoName}`;
+      const thumbnailUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${thumbnailName}`;
       console.log('Video public URL:', videoPublicUrl);
 
       const result = await prisma.video.create({

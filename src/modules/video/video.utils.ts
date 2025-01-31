@@ -3,7 +3,7 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { writeFileSync, readFileSync, unlinkSync } from 'fs';
 import ffmpegPath from 'ffmpeg-static';
-import minioClient from '../../clients/minioClient';
+import minioClient from '../../clients/minio';
 
 if (!ffmpegPath) {
    throw new Error(

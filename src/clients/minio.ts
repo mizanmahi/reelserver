@@ -8,7 +8,7 @@ const minioClient = new Client({
    secretKey: process.env.MINIO_SECRET_KEY || 'minioadmin',
 });
 
-export const bucketName = 'reels';
+export const bucketName = process.env.MINIO_BUCKET_NAME || 'videos';
 
 (async () => {
    const exists = await minioClient.bucketExists(bucketName).catch(() => false);

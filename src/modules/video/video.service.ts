@@ -2,7 +2,7 @@ import { Video } from '@prisma/client';
 import { File, IVideoPayload } from './video.interface';
 import { processVideoUpload } from './video.utils';
 import { JwtPayload } from 'jsonwebtoken';
-import redis from '../../clients/redisClient';
+import redis from '../../clients/redis';
 
 import { prisma } from '../../database/database';
 
@@ -20,6 +20,8 @@ const uploadVideo = async (
          file.originalname,
          process.env.MINIO_BUCKET_NAME as string
       );
+
+      // const videoMetaData = await getVideoMetadata(file.buffer);
 
       console.log('Video URL:', videoUrl);
       console.log('Thumbnail URL:', thumbnailUrl);

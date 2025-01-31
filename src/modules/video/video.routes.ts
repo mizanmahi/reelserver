@@ -1,6 +1,6 @@
 import express from 'express';
 import { VideoController } from './video.controller';
-import multerUpload from '../../middlewares/upload';
+import multerUpload from '../../middlewares/fileUploader';
 import { parseBody } from '../../middlewares/parseBody';
 import { auth } from '../../middlewares/auth';
 

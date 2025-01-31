@@ -2,12 +2,12 @@ import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 import { videoRoutes } from './modules/video/video.routes';
-import { authRoutes } from './modules/auth/auth.routes';
+import { authRoutes } from './modules/user/auth.routes';
 import globalErrorHandler from './middlewares/globalErrorHandler';
-import { analyticsRoutes } from './modules/analytics/analytics.routes';
+import { analyticsRoutes } from './modules/statistics/statistics.routes';
 import logRequest from './middlewares/logger';
 import { limiter } from './middlewares/rateLimiter';
-import { register } from './clients/promClient';
+import { register } from './clients/prom';
 import { trackHttpMetrics } from './middlewares/metrics';
 
 const app: Application = express();

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { httpRequestCounter, httpRequestDuration } from '../clients/promClient';
+import { httpRequestCounter, httpRequestDuration } from '../clients/prom';
 
 export const trackHttpMetrics = (
    req: Request,

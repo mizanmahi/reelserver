@@ -5,6 +5,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import redis from '../../clients/redis';
 
 import { prisma } from '../../database/database';
+import logger from '../../logger/logger';
 
 const uploadVideo = async (
    file: File,
@@ -16,12 +17,15 @@ const uploadVideo = async (
 
    try {
       // Process video and thumbnail
-      const { compressedVideoUrl: videoUrl, thumbnailUrl } =
-         await processVideoUpload(
-            file.buffer,
-            file.originalname,
-            process.env.MINIO_BUCKET_NAME as string
-         );
+      const {
+         compressedVideoUrl: videoUrl,
+         thumbnailUrl,
+         metadata,
+      } = await processVideoUpload(
+         file.buffer,
+         file.originalname,
+         process.env.MINIO_BUCKET_NAME as string
+      );
 
       // const videoMetaData = await getVideoMetadata(file.buffer);
 
@@ -36,13 +40,14 @@ const uploadVideo = async (
             videoUrl,
             thumbnail: thumbnailUrl,
             uploaderId: user.id,
+            metadata: JSON.stringify(metadata.format),
          },
       });
 
       return videoRecord;
    } catch (error) {
-      console.error('Video upload failed:', error);
-      throw new Error('Failed to upload video and thumbnail');
+      logger.error('Video upload failed:', error);
+      throw new Error(`Failed to upload video: ${(error as Error).message}`);
    }
 };
 

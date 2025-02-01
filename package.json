@@ -1,9 +1,9 @@
 {
-   "name": "reel-stream",
+   "name": "reel-backend",
    "version": "1.0.0",
    "main": "index.js",
-   "repository": "https://github.com/fahimahammed/ReelStream.git",
-   "author": "Fahim Ahammed Firoz",
+   "repository": "https://github.com/mizanmahi/reelserver.git",
+   "author": "Mizanur Rahman",
    "license": "MIT",
    "scripts": {
       "dev": "ts-node-dev --respawn --transpile-only src/server.ts",

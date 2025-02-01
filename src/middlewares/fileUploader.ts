@@ -8,11 +8,12 @@ const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50MB
 const storage = multer.memoryStorage();
 
 const fileFilter = (
-   _req: Request,
+   req: Request,
    file: Express.Multer.File,
    cb: FileFilterCallback
 ) => {
    const fileExt = path.extname(file.originalname).toLowerCase();
+   console.log('comes in the upload middleware');
 
    if (!SUPPORTED_FILE_EXTENSIONS.includes(fileExt)) {
       return cb(new Error('Invalid file format! Only .mp4 files are allowed.'));

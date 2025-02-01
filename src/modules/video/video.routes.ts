@@ -9,7 +9,7 @@ const router = express.Router();
 router.post(
    '/upload',
    auth,
-   multerUpload.single('video'),
+   multerUpload.single('reelVideo'),
    parseBody,
    VideoController.uploadVideo
 );

@@ -5,6 +5,7 @@ import catchAsync from '../../utils/catchAsync';
 
 const uploadVideo = catchAsync(async (req: Request, res: Response) => {
    const { file } = req;
+
    if (!file) throw new Error('Video file is required');
 
    console.log('user: ', req.user);

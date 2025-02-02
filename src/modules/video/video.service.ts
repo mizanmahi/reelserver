@@ -111,7 +111,12 @@ const getAllVideos = async (query: Record<string, unknown>) => {
    return result;
 };
 
-const getVideoById = async (deviceKey: string, videoId: string) => {
+// need to handle the liked or unliked by current user if token comes
+const getVideoById = async (
+   deviceKey: string,
+   videoId: string,
+   userId?: string
+) => {
    const getCurrentTimestamp = () => Math.floor(Date.now() / 1000);
    const cacheKey = `video:${videoId}`;
    const viewCoolDown = 30 * 60; // 30 minutes in seconds
@@ -142,6 +147,17 @@ const getVideoById = async (deviceKey: string, videoId: string) => {
 
       // Cache the video details
       await redis.setex(cacheKey, 300, JSON.stringify(video)); // Cache for 5 min
+   }
+
+   // Determine if the user has liked the video
+   let isLiked = false;
+   if (userId) {
+      const engagement = await prisma.engagement.findUnique({
+         where: {
+            videoId_userId: { videoId, userId },
+         },
+      });
+      isLiked = !!engagement;
    }
 
    // Get the last viewed timestamp for the device from Redis
@@ -202,6 +218,7 @@ const getVideoById = async (deviceKey: string, videoId: string) => {
       ...video,
       prevVideoId: prevVideo?.id || null, // Include previous video ID
       nextVideoId: nextVideo?.id || null, // Include next video ID
+      isLiked,
    };
 };
 

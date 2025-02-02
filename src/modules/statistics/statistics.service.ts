@@ -47,6 +47,8 @@ const getUserProfileStats = async (authUser: JwtPayload): Promise<any> => {
          orderBy: { viewCount: 'desc' },
          select: {
             id: true,
+            videoUrl: true,
+            thumbnail: true,
             title: true,
             viewCount: true,
             likeCount: true,
@@ -69,6 +71,7 @@ const getUserProfileStats = async (authUser: JwtPayload): Promise<any> => {
             title: true,
             viewCount: true,
             likeCount: true,
+            videoUrl: true,
          },
       });
 
@@ -76,12 +79,27 @@ const getUserProfileStats = async (authUser: JwtPayload): Promise<any> => {
       const topVideos = await prisma.video.findMany({
          where: { uploaderId: id },
          orderBy: { viewCount: 'desc' },
-         take: 5,
+         take: 3,
          select: {
             id: true,
             title: true,
             viewCount: true,
             likeCount: true,
+            videoUrl: true,
+         },
+      });
+
+      // user info
+      const profile = await prisma.user.findUniqueOrThrow({
+         where: {
+            id,
+         },
+         select: {
+            id: true,
+            name: true,
+            email: true,
+            contact: true,
+            createdAt: true,
          },
       });
 
@@ -93,9 +111,11 @@ const getUserProfileStats = async (authUser: JwtPayload): Promise<any> => {
          mostPopularVideo: mostPopularVideo
             ? {
                  id: mostPopularVideo.id,
+                 videoUrl: mostPopularVideo.videoUrl,
+                 thumbnail: mostPopularVideo.thumbnail,
                  title: mostPopularVideo.title,
-                 views: mostPopularVideo.viewCount,
-                 likes: mostPopularVideo.likeCount,
+                 viewCount: mostPopularVideo.viewCount,
+                 likeCount: mostPopularVideo.likeCount,
               }
             : null,
          engagementRate: engagementRate.toFixed(2) + '%', // Format as percentage
@@ -103,6 +123,7 @@ const getUserProfileStats = async (authUser: JwtPayload): Promise<any> => {
          totalEngagements,
          engagementBreakdown,
          topVideos,
+         profile,
       };
 
       return statistics;

@@ -15,7 +15,7 @@ router.post(
 );
 router.get('/', VideoController.getAllVideos);
 router.get('/:id', VideoController.getVideoById);
-
+router.get('/:id/:userId', VideoController.getVideoById);
 router.post('/:id', auth, VideoController.toggleVideoLike);
 
 export const videoRoutes = router;

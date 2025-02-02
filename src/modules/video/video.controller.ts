@@ -5,6 +5,7 @@ import catchAsync from '../../utils/catchAsync';
 
 const uploadVideo = catchAsync(async (req: Request, res: Response) => {
    const { file } = req;
+
    if (!file) throw new Error('Video file is required');
 
    console.log('user: ', req.user);
@@ -36,12 +37,13 @@ const generateDeviceKey = (req: Request) => {
 
 const getVideoById = catchAsync(async (req: Request, res: Response) => {
    const {
-      params: { id },
+      params: { id, userId },
    } = req;
 
    const deviceKey = generateDeviceKey(req);
+   console.log('User id in controller', userId);
 
-   const result = await VideoService.getVideoById(deviceKey, id);
+   const result = await VideoService.getVideoById(deviceKey, id, userId);
    sendResponse(res, {
       statusCode: 200,
       success: true,

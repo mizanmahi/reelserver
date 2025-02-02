@@ -3,11 +3,8 @@ import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
 import { StatisticService } from './statistics.service';
 
-const myProfileStatistics = catchAsync(async (req: Request, res: Response) => {
-   const result = await StatisticService.myProfileStatistics(
-      req.user,
-      req.query
-   );
+const getUserProfileStats = catchAsync(async (req: Request, res: Response) => {
+   const result = await StatisticService.getUserProfileStats(req.user);
    sendResponse(res, {
       statusCode: 201,
       success: true,
@@ -17,5 +14,5 @@ const myProfileStatistics = catchAsync(async (req: Request, res: Response) => {
 });
 
 export const StatisticsController = {
-   myProfileStatistics,
+   getUserProfileStats,
 };

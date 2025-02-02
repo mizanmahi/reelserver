@@ -26,7 +26,7 @@ app.use(trackHttpMetrics);
 
 app.use('/api/v1/video', videoRoutes);
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/analytics', statisticsRoutes);
+app.use('/api/v1/statistics', statisticsRoutes);
 app.get('/metrics', async (_req, res) => {
    res.set('Content-Type', register.contentType);
    res.end(await register.metrics());

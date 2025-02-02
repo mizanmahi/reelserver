@@ -8,7 +8,7 @@ const MAX_UPLOAD_SIZE = 50 * 1024 * 1024; // 50MB
 const storage = multer.memoryStorage();
 
 const fileFilter = (
-   _req: Request,
+   req: Request,
    file: Express.Multer.File,
    cb: FileFilterCallback
 ) => {

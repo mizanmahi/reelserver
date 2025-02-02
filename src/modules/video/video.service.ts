@@ -5,6 +5,7 @@ import { JwtPayload } from 'jsonwebtoken';
 import redis from '../../clients/redis';
 
 import { prisma } from '../../database/database';
+import logger from '../../logger/logger';
 
 const uploadVideo = async (
    file: File,
@@ -16,12 +17,15 @@ const uploadVideo = async (
 
    try {
       // Process video and thumbnail
-      const { compressedVideoUrl: videoUrl, thumbnailUrl } =
-         await processVideoUpload(
-            file.buffer,
-            file.originalname,
-            process.env.MINIO_BUCKET_NAME as string
-         );
+      const {
+         compressedVideoUrl: videoUrl,
+         thumbnailUrl,
+         metadata,
+      } = await processVideoUpload(
+         file.buffer,
+         file.originalname,
+         process.env.MINIO_BUCKET_NAME as string
+      );
 
       // const videoMetaData = await getVideoMetadata(file.buffer);
 
@@ -36,13 +40,27 @@ const uploadVideo = async (
             videoUrl,
             thumbnail: thumbnailUrl,
             uploaderId: user.id,
+            metadata: JSON.stringify(metadata.format),
          },
       });
 
+      // const keys = await redis.keys('videos:*'); // less effective
+      // if (keys.length > 0) {
+      //    await redis.del(...keys);
+      // }
+
+      // await redis.incr('videos:version'); // super effective
+      try {
+         await redis.incr('videos:version');
+         console.log('Cache version incremented successfully');
+      } catch (error) {
+         console.error('Failed to increment cache version:', error);
+      }
+
       return videoRecord;
    } catch (error) {
-      console.error('Video upload failed:', error);
-      throw new Error('Failed to upload video and thumbnail');
+      logger.error('Video upload failed:', error);
+      throw new Error(`Failed to upload video: ${(error as Error).message}`);
    }
 };
 
@@ -51,7 +69,11 @@ const getAllVideos = async (query: Record<string, unknown>) => {
    const limit = parseInt(query.limit as string) || 10;
    const skip = (page - 1) * limit;
 
-   const cacheKey = `videos:${page}:${limit}`;
+   // const cacheKey = `videos:${page}:${limit}`;
+
+   const version = (await redis.get('videos:version')) || 1;
+   console.log({ nextAllCall: version });
+   const cacheKey = `videos:v${version}:${page}:${limit}`;
    const cachedVideos = await redis.get(cacheKey);
 
    if (cachedVideos) {
@@ -73,13 +95,28 @@ const getAllVideos = async (query: Record<string, unknown>) => {
       },
    });
 
-   await redis.setex(cacheKey, 1800, JSON.stringify(videos));
+   const total = await prisma.video.count();
 
-   return videos;
+   const result = {
+      meta: {
+         page,
+         limit,
+         total,
+      },
+      data: videos,
+   };
+
+   await redis.setex(cacheKey, 150, JSON.stringify(result));
+
+   return result;
 };
 
-const getVideoById = async (deviceKey: string, videoId: string) => {
-   // Getting the current timestamp in seconds
+// need to handle the liked or unliked by current user if token comes
+const getVideoById = async (
+   deviceKey: string,
+   videoId: string,
+   userId?: string
+) => {
    const getCurrentTimestamp = () => Math.floor(Date.now() / 1000);
    const cacheKey = `video:${videoId}`;
    const viewCoolDown = 30 * 60; // 30 minutes in seconds
@@ -109,7 +146,20 @@ const getVideoById = async (deviceKey: string, videoId: string) => {
       }
 
       // Cache the video details
-      await redis.setex(cacheKey, 3600, JSON.stringify(video)); // Cache for 1 hour
+      // Cache for 2.5 min
+   }
+
+   // Determine if the user has liked the video
+   let isLiked = false;
+   console.log({ userId });
+   if (userId) {
+      const engagement = await prisma.engagement.findUnique({
+         where: {
+            videoId_userId: { videoId, userId },
+         },
+      });
+      console.log({ engagement });
+      isLiked = !!engagement;
    }
 
    // Get the last viewed timestamp for the device from Redis
@@ -145,11 +195,37 @@ const getVideoById = async (deviceKey: string, videoId: string) => {
 
       if (updatedVideo) {
          // Update the cache with the new view count
-         await redis.setex(cacheKey, 3600, JSON.stringify(updatedVideo)); // Cache for 1 hour
+         await redis.setex(cacheKey, 150, JSON.stringify(updatedVideo));
       }
    }
 
-   return video;
+   // Fetch previous and next video IDs
+   const prevVideo = await prisma.video.findFirst({
+      where: {
+         createdAt: { lt: video.createdAt },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true },
+   });
+
+   const nextVideo = await prisma.video.findFirst({
+      where: {
+         createdAt: { gt: video.createdAt },
+      },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+   });
+
+   const result = {
+      ...video,
+      prevVideoId: prevVideo?.id || null, // Include previous video ID
+      nextVideoId: nextVideo?.id || null, // Include next video ID
+      isLiked,
+   };
+
+   await redis.setex(cacheKey, 150, JSON.stringify(result));
+
+   return result;
 };
 
 const toggleVideoLike = async (videoId: string, authUser: JwtPayload) => {
@@ -170,6 +246,9 @@ const toggleVideoLike = async (videoId: string, authUser: JwtPayload) => {
             select: { likeCount: true },
          });
 
+         const cacheKey = `video:${videoId}`;
+         await redis.del(cacheKey); // Delete cache
+
          return {
             videoId,
             likeCount: updatedVideo.likeCount,
@@ -187,6 +266,8 @@ const toggleVideoLike = async (videoId: string, authUser: JwtPayload) => {
          data: { likeCount: { increment: 1 } },
          select: { likeCount: true },
       });
+      const cacheKey = `video:${videoId}`;
+      await redis.del(cacheKey); // Delete cache
 
       return {
          videoId,

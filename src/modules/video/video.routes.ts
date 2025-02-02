@@ -9,13 +9,13 @@ const router = express.Router();
 router.post(
    '/upload',
    auth,
-   multerUpload.single('video'),
+   multerUpload.single('reelVideo'),
    parseBody,
    VideoController.uploadVideo
 );
 router.get('/', VideoController.getAllVideos);
 router.get('/:id', VideoController.getVideoById);
-
+router.get('/:id/:userId', VideoController.getVideoById);
 router.post('/:id', auth, VideoController.toggleVideoLike);
 
 export const videoRoutes = router;

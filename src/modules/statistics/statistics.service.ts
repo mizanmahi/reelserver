@@ -2,40 +2,137 @@ import { JwtPayload } from 'jsonwebtoken';
 import { prisma } from '../../database/database';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-const myProfileStatistics = async (
-   authUser: JwtPayload,
-   query: Record<string, unknown>
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-): Promise<any> => {
-   const { startDate, endDate } = query;
+const getUserProfileStats = async (authUser: JwtPayload): Promise<any> => {
    const id = authUser.id;
 
-   const whereCondition = {
-      uploadedBy: id,
-      createdAt: {
-         gte: startDate ? new Date(startDate as string) : undefined,
-         lte: endDate ? new Date(endDate as string) : undefined,
-      },
-   };
+   try {
+      // Fetch user with their videos and calculate statistics
+      const user = await prisma.user.findUnique({
+         where: { id },
+         include: {
+            videos: {
+               select: {
+                  id: true,
+                  title: true,
+                  viewCount: true,
+                  likeCount: true,
+               },
+            },
+         },
+      });
 
-   const [videoStats, likeStats] = await Promise.all([
-      prisma.video.aggregate({
-         where: whereCondition,
-         _sum: { viewCount: true },
-         _count: { _all: true },
-      }),
-      prisma.engagement.count({
-         where: { video: whereCondition },
-      }),
-   ]);
+      if (!user) {
+         throw new Error('User not found.');
+      }
 
-   return {
-      totalViews: videoStats._sum.viewCount || 0,
-      totalLikes: likeStats || 0,
-      totalUploads: videoStats._count._all || 0,
-   };
+      // Calculate statistics using Prisma aggregation
+      const videoStats = await prisma.video.aggregate({
+         where: { uploaderId: id },
+         _sum: {
+            viewCount: true,
+            likeCount: true,
+         },
+         _count: {
+            id: true,
+         },
+      });
+
+      const totalVideos = videoStats._count.id;
+      const totalViews = videoStats._sum.viewCount || 0;
+      const totalLikes = videoStats._sum.likeCount || 0;
+
+      // Find the most popular video
+      const mostPopularVideo = await prisma.video.findFirst({
+         where: { uploaderId: id },
+         orderBy: { viewCount: 'desc' },
+         select: {
+            id: true,
+            videoUrl: true,
+            thumbnail: true,
+            title: true,
+            viewCount: true,
+            likeCount: true,
+         },
+      });
+
+      // Calculate engagement rate
+      const engagementRate =
+         totalViews > 0 ? (totalLikes / totalViews) * 100 : 0;
+
+      // Optional: Additional statistics
+      const averageViews = totalVideos > 0 ? totalViews / totalVideos : 0;
+      const totalEngagements = totalViews + totalLikes;
+
+      // Fetch engagement breakdown (optional)
+      const engagementBreakdown = await prisma.video.findMany({
+         where: { uploaderId: id },
+         select: {
+            id: true,
+            title: true,
+            viewCount: true,
+            likeCount: true,
+            videoUrl: true,
+         },
+      });
+
+      // Fetch top 5 most popular videos
+      const topVideos = await prisma.video.findMany({
+         where: { uploaderId: id },
+         orderBy: { viewCount: 'desc' },
+         take: 3,
+         select: {
+            id: true,
+            title: true,
+            viewCount: true,
+            likeCount: true,
+            videoUrl: true,
+         },
+      });
+
+      // user info
+      const profile = await prisma.user.findUniqueOrThrow({
+         where: {
+            id,
+         },
+         select: {
+            id: true,
+            name: true,
+            email: true,
+            contact: true,
+            createdAt: true,
+         },
+      });
+
+      // Prepare the response
+      const statistics = {
+         totalVideos,
+         totalViews,
+         totalLikes,
+         mostPopularVideo: mostPopularVideo
+            ? {
+                 id: mostPopularVideo.id,
+                 videoUrl: mostPopularVideo.videoUrl,
+                 thumbnail: mostPopularVideo.thumbnail,
+                 title: mostPopularVideo.title,
+                 viewCount: mostPopularVideo.viewCount,
+                 likeCount: mostPopularVideo.likeCount,
+              }
+            : null,
+         engagementRate: engagementRate.toFixed(2) + '%', // Format as percentage
+         averageViews,
+         totalEngagements,
+         engagementBreakdown,
+         topVideos,
+         profile,
+      };
+
+      return statistics;
+   } catch (error) {
+      console.error('Error fetching profile statistics:', error);
+      throw new Error('Failed to fetch profile statistics.');
+   }
 };
 
 export const StatisticService = {
-   myProfileStatistics,
+   getUserProfileStats,
 };

@@ -106,7 +106,7 @@ const getAllVideos = async (query: Record<string, unknown>) => {
       data: videos,
    };
 
-   await redis.setex(cacheKey, 300, JSON.stringify(result));
+   await redis.setex(cacheKey, 150, JSON.stringify(result));
 
    return result;
 };
@@ -146,17 +146,19 @@ const getVideoById = async (
       }
 
       // Cache the video details
-      await redis.setex(cacheKey, 300, JSON.stringify(video)); // Cache for 5 min
+      // Cache for 2.5 min
    }
 
    // Determine if the user has liked the video
    let isLiked = false;
+   console.log({ userId });
    if (userId) {
       const engagement = await prisma.engagement.findUnique({
          where: {
             videoId_userId: { videoId, userId },
          },
       });
+      console.log({ engagement });
       isLiked = !!engagement;
    }
 
@@ -193,7 +195,7 @@ const getVideoById = async (
 
       if (updatedVideo) {
          // Update the cache with the new view count
-         await redis.setex(cacheKey, 300, JSON.stringify(updatedVideo));
+         await redis.setex(cacheKey, 150, JSON.stringify(updatedVideo));
       }
    }
 
@@ -214,12 +216,16 @@ const getVideoById = async (
       select: { id: true },
    });
 
-   return {
+   const result = {
       ...video,
       prevVideoId: prevVideo?.id || null, // Include previous video ID
       nextVideoId: nextVideo?.id || null, // Include next video ID
       isLiked,
    };
+
+   await redis.setex(cacheKey, 150, JSON.stringify(result));
+
+   return result;
 };
 
 const toggleVideoLike = async (videoId: string, authUser: JwtPayload) => {
@@ -240,6 +246,9 @@ const toggleVideoLike = async (videoId: string, authUser: JwtPayload) => {
             select: { likeCount: true },
          });
 
+         const cacheKey = `video:${videoId}`;
+         await redis.del(cacheKey); // Delete cache
+
          return {
             videoId,
             likeCount: updatedVideo.likeCount,
@@ -257,6 +266,8 @@ const toggleVideoLike = async (videoId: string, authUser: JwtPayload) => {
          data: { likeCount: { increment: 1 } },
          select: { likeCount: true },
       });
+      const cacheKey = `video:${videoId}`;
+      await redis.del(cacheKey); // Delete cache
 
       return {
          videoId,

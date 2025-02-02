@@ -106,13 +106,12 @@ const getAllVideos = async (query: Record<string, unknown>) => {
       data: videos,
    };
 
-   await redis.setex(cacheKey, 1800, JSON.stringify(result));
+   await redis.setex(cacheKey, 300, JSON.stringify(result));
 
    return result;
 };
 
 const getVideoById = async (deviceKey: string, videoId: string) => {
-   // Getting the current timestamp in seconds
    const getCurrentTimestamp = () => Math.floor(Date.now() / 1000);
    const cacheKey = `video:${videoId}`;
    const viewCoolDown = 30 * 60; // 30 minutes in seconds
@@ -142,7 +141,7 @@ const getVideoById = async (deviceKey: string, videoId: string) => {
       }
 
       // Cache the video details
-      await redis.setex(cacheKey, 1800, JSON.stringify(video)); // Cache for .5 hour
+      await redis.setex(cacheKey, 300, JSON.stringify(video)); // Cache for 5 min
    }
 
    // Get the last viewed timestamp for the device from Redis
@@ -178,11 +177,32 @@ const getVideoById = async (deviceKey: string, videoId: string) => {
 
       if (updatedVideo) {
          // Update the cache with the new view count
-         await redis.setex(cacheKey, 1800, JSON.stringify(updatedVideo)); // Cache for .5 hour
+         await redis.setex(cacheKey, 300, JSON.stringify(updatedVideo));
       }
    }
 
-   return video;
+   // Fetch previous and next video IDs
+   const prevVideo = await prisma.video.findFirst({
+      where: {
+         createdAt: { lt: video.createdAt },
+      },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true },
+   });
+
+   const nextVideo = await prisma.video.findFirst({
+      where: {
+         createdAt: { gt: video.createdAt },
+      },
+      orderBy: { createdAt: 'asc' },
+      select: { id: true },
+   });
+
+   return {
+      ...video,
+      prevVideoId: prevVideo?.id || null, // Include previous video ID
+      nextVideoId: nextVideo?.id || null, // Include next video ID
+   };
 };
 
 const toggleVideoLike = async (videoId: string, authUser: JwtPayload) => {

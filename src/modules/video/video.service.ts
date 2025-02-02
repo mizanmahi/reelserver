@@ -44,6 +44,19 @@ const uploadVideo = async (
          },
       });
 
+      // const keys = await redis.keys('videos:*'); // less effective
+      // if (keys.length > 0) {
+      //    await redis.del(...keys);
+      // }
+
+      // await redis.incr('videos:version'); // super effective
+      try {
+         await redis.incr('videos:version');
+         console.log('Cache version incremented successfully');
+      } catch (error) {
+         console.error('Failed to increment cache version:', error);
+      }
+
       return videoRecord;
    } catch (error) {
       logger.error('Video upload failed:', error);
@@ -56,7 +69,11 @@ const getAllVideos = async (query: Record<string, unknown>) => {
    const limit = parseInt(query.limit as string) || 10;
    const skip = (page - 1) * limit;
 
-   const cacheKey = `videos:${page}:${limit}`;
+   // const cacheKey = `videos:${page}:${limit}`;
+
+   const version = (await redis.get('videos:version')) || 1;
+   console.log({ nextAllCall: version });
+   const cacheKey = `videos:v${version}:${page}:${limit}`;
    const cachedVideos = await redis.get(cacheKey);
 
    if (cachedVideos) {
@@ -78,9 +95,20 @@ const getAllVideos = async (query: Record<string, unknown>) => {
       },
    });
 
-   await redis.setex(cacheKey, 1800, JSON.stringify(videos));
+   const total = await prisma.video.count();
 
-   return videos;
+   const result = {
+      meta: {
+         page,
+         limit,
+         total,
+      },
+      data: videos,
+   };
+
+   await redis.setex(cacheKey, 1800, JSON.stringify(result));
+
+   return result;
 };
 
 const getVideoById = async (deviceKey: string, videoId: string) => {
@@ -114,7 +142,7 @@ const getVideoById = async (deviceKey: string, videoId: string) => {
       }
 
       // Cache the video details
-      await redis.setex(cacheKey, 3600, JSON.stringify(video)); // Cache for 1 hour
+      await redis.setex(cacheKey, 1800, JSON.stringify(video)); // Cache for .5 hour
    }
 
    // Get the last viewed timestamp for the device from Redis
@@ -150,7 +178,7 @@ const getVideoById = async (deviceKey: string, videoId: string) => {
 
       if (updatedVideo) {
          // Update the cache with the new view count
-         await redis.setex(cacheKey, 3600, JSON.stringify(updatedVideo)); // Cache for 1 hour
+         await redis.setex(cacheKey, 1800, JSON.stringify(updatedVideo)); // Cache for .5 hour
       }
    }
 

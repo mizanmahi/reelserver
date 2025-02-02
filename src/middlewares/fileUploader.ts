@@ -13,7 +13,6 @@ const fileFilter = (
    cb: FileFilterCallback
 ) => {
    const fileExt = path.extname(file.originalname).toLowerCase();
-   console.log('comes in the upload middleware');
 
    if (!SUPPORTED_FILE_EXTENSIONS.includes(fileExt)) {
       return cb(new Error('Invalid file format! Only .mp4 files are allowed.'));

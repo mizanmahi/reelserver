@@ -1,6 +1,6 @@
 # **ReelServer**
 
-**Slogan:** _"Your favorite place for sharing and discovering reel videos."_
+## "Your favorite place for sharing and discovering reel videos."\_
 
 ---
 

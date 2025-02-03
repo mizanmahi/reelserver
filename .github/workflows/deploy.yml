@@ -24,7 +24,7 @@ jobs:
 
                  # Clone repo if it doesn't exist
                  if [ ! -d "reels-backend" ]; then
-                   git clone https://github.com/YOUR_GITHUB_USERNAME/reels-backend.git
+                   git clone https://github.com/mizanmahi/reelserver.git
                  fi
 
                  cd reels-backend

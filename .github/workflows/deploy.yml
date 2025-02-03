@@ -70,6 +70,6 @@ jobs:
                 sudo docker network prune -f
                 sudo docker rmi $(docker images -q) -f
                 
-                # run up tge app continers
+                # run up tge app containers
                 sudo docker-compose up -d --build
               EOF

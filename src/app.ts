@@ -1,14 +1,12 @@
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
-import { videoRoutes } from './modules/video/video.routes';
-import { authRoutes } from './modules/user/auth.routes';
 import globalErrorHandler from './middlewares/globalErrorHandler';
-import { statisticsRoutes } from './modules/statistics/statistics.routes';
 import logRequest from './middlewares/logger';
 import { limiter } from './middlewares/rateLimiter';
 import { register } from './clients/prom';
 import { trackHttpMetrics } from './middlewares/metrics';
+import router from './routes';
 
 const app: Application = express();
 
@@ -24,18 +22,19 @@ app.use('/api/v1', logRequest);
 app.use('/api/v1', limiter);
 app.use(trackHttpMetrics);
 
-app.use('/api/v1/video', videoRoutes);
-app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/statistics', statisticsRoutes);
+app.use('/api/v1', router);
+
+// routes for metrics
 app.get('/metrics', async (_req, res) => {
    res.set('Content-Type', register.contentType);
    res.end(await register.metrics());
 });
 
+// root route
 app.get('/', async (req: Request, res: Response) => {
    res.status(200).json({
       success: true,
-      message: 'Server is working...!',
+      message: 'Server is up an running...!',
    });
 });
 

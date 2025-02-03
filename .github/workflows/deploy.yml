@@ -23,11 +23,11 @@ jobs:
                  cd /home/ubuntu || exit
 
                  # Clone repo if it doesn't exist
-                 if [ ! -d "reels-backend" ]; then
+                 if [ ! -d "reelserver" ]; then
                    git clone https://github.com/mizanmahi/reelserver.git
                  fi
 
-                 cd reels-backend
+                 cd reelserver
                  git pull origin main
 
                  # Install dependencies

@@ -15,10 +15,13 @@ jobs:
 
          - name: Deploy to EC2 using Appleboy SSH
            uses: appleboy/ssh-action@v0.1.10
+           env:
+              EC2_HOST: ${{ secrets.EC2_HOST }}
            with:
               host: ${{ secrets.EC2_HOST }}
               username: ubuntu
               key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+              port: 22
               script: |
                  cd /home/ubuntu || exit
 
@@ -31,9 +34,9 @@ jobs:
                  git pull origin main
 
                  # Install dependencies
-                 yarn install --frozen-lockfile
+                 ssh ubuntu@$EC2_HOST "cd ~/reelserver && export PATH=$PATH:/run/user/1000/fnm_multishells/112424_1734077954807/bin && yarn install --frozen-lockfile
 
                  # Run Docker Compose
-                 docker-compose down
-                 docker-compose up --build -d
-                 docker image prune -f
+                 ssh ubuntu@$EC2_HOST "cd ~/reelserver && export PATH=$PATH:/run/user/1000/fnm_multishells/112424_1734077954807/bin && docker-compose down
+                 ssh ubuntu@$EC2_HOST "cd ~/reelserver && export PATH=$PATH:/run/user/1000/fnm_multishells/112424_1734077954807/bin && docker-compose up --build -d
+                 ssh ubuntu@$EC2_HOST "cd ~/reelserver && export PATH=$PATH:/run/user/1000/fnm_multishells/112424_1734077954807/bin &&  docker image prune -f

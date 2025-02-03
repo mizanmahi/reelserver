@@ -145,7 +145,7 @@ Example:
 
 For a better experience, clone and run the frontend on your machine using the repository below:
 
-**Frontend Repository:** [Your Frontend Repo Link Here] (https://github.com/mizanmahi/reelclient.git)
+**Frontend Repository:** [Your Frontend Repo Link Here](https://github.com/mizanmahi/reelclient.git)
 
 ### **Deployment YAML**
 

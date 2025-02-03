@@ -13,7 +13,7 @@ jobs:
       steps:
          - uses: actions/checkout@v3
 
-         # Configure SSH
+         # configure SSH
          - name: Configure SSH
            env:
               SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
@@ -23,7 +23,7 @@ jobs:
               chmod 600 ~/.ssh/id_rsa
               ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-         # Deploy to EC2 using Docker Compose
+         # deploy to EC2 using Docker Compose
          - name: Deploy to EC2 with Docker Compose
            env:
               EC2_HOST: ${{ secrets.EC2_HOST }}
@@ -41,10 +41,12 @@ jobs:
 
               # SSH into EC2, pull the latest Docker image and run with Docker Compose
               ssh $EC2_USER@$EC2_HOST << 'EOF'
-                # Navigate to the app directory
+                # navigate to the app directory
                 cd ~/app
+                # get the app envs
+                echo "${{ secrets.APP_ENVS }}" > .env
 
-                # Ensure Docker and Docker Compose are installed
+                # ensure Docker and Docker Compose are installed
                 if ! command -v docker &> /dev/null; then
                     echo "Docker not found, installing Docker..."
                     sudo apt-get update
@@ -59,7 +61,7 @@ jobs:
                     sudo chmod +x /usr/local/bin/docker-compose
                 fi
 
-                # Build and run the app using Docker Compose
+                #build and run the app using Docker Compose
                 sudo docker-compose down
                 sudo docker-compose up -d --build
               EOF

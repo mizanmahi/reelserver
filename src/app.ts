@@ -7,6 +7,7 @@ import { limiter } from './middlewares/rateLimiter';
 import { register } from './clients/prom';
 import { trackHttpMetrics } from './middlewares/metrics';
 import router from './routes';
+import compress from './middlewares/compression';
 
 const app: Application = express();
 
@@ -21,6 +22,7 @@ app.use('/api/v1', logRequest);
 // user rate limiter to all the routes starting with /api/v1
 app.use('/api/v1', limiter);
 app.use(trackHttpMetrics);
+app.use(compress);
 
 app.use('/api/v1', router);
 

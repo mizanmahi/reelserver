@@ -1,6 +1,6 @@
 # **ReelServer**
 
-## "Your favorite place for sharing and discovering reel videos."\_
+## _"Your favorite place for sharing and discovering reel videos."_
 
 ---
 
@@ -112,7 +112,8 @@ Below is a high-level architecture diagram of ReelServer:
 2. **Rate Limiting**: Implement rate limiting to prevent abuse and ensure fair usage of resources.
 3. **Video Compression**: Compress videos during upload to save storage and reduce bandwidth usage.
 4. **Log Rotation**: Manage log files efficiently to prevent disk space issues.
-5. **Asynchronous Processing**: Offload tasks like video compression and thumbnail extraction to background workers.
+5. **Asynchronous Processing**: Offload tasks like video compression and thumbnail extraction to background workers. Used multi-threading with worker_threads. 🔄
+6. **Fine-Tuning Compression**: Reduce payload size using gzip or Brotli compression. ⚡
 
 ---
 

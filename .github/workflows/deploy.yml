@@ -1,0 +1,39 @@
+name: Deploy to EC2
+
+on:
+   push:
+      branches:
+         - main
+
+jobs:
+   deploy:
+      runs-on: ubuntu-latest
+
+      steps:
+         - name: Checkout Repository
+           uses: actions/checkout@v4
+
+         - name: Deploy to EC2 using Appleboy SSH
+           uses: appleboy/ssh-action@v0.1.10
+           with:
+              host: ${{ secrets.EC2_HOST }}
+              username: ubuntu
+              key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+              script: |
+                 cd /home/ubuntu || exit
+
+                 # Clone repo if it doesn't exist
+                 if [ ! -d "reels-backend" ]; then
+                   git clone https://github.com/YOUR_GITHUB_USERNAME/reels-backend.git
+                 fi
+
+                 cd reels-backend
+                 git pull origin main
+
+                 # Install dependencies
+                 yarn install --frozen-lockfile
+
+                 # Run Docker Compose
+                 docker-compose down
+                 docker-compose up --build -d
+                 docker image prune -f

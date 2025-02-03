@@ -89,7 +89,19 @@ Explore the API endpoints and test them using the provided Postman documentation
 
 Below is a high-level architecture diagram of ReelServer:
 
-// image of diagram
+```mermaid
+graph TD
+    A[Client Request] --> B[Node.js Server]
+    B --> C{Cache Check}
+    C -- Cache Hit --> D[Return Cached Data to Client]
+    C -- Cache Miss --> E[Query Postgres Database]
+    E --> F{Is Video Processing Required?}
+    F -- Yes --> G[Offload to Node.js Worker Thread]
+    G --> H[Process Video]
+    H --> I[Update Cache]
+    F -- No --> I
+    I --> J[Return Data to Client]
+```
 
 ---
 

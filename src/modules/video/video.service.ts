@@ -106,7 +106,7 @@ const getAllVideos = async (query: Record<string, unknown>) => {
       data: videos,
    };
 
-   await redis.setex(cacheKey, 150, JSON.stringify(result));
+   await redis.setex(cacheKey, 60, JSON.stringify(result));
 
    return result;
 };
@@ -195,7 +195,7 @@ const getVideoById = async (
 
       if (updatedVideo) {
          // Update the cache with the new view count
-         await redis.setex(cacheKey, 150, JSON.stringify(updatedVideo));
+         await redis.setex(cacheKey, 60, JSON.stringify(updatedVideo));
       }
    }
 
@@ -223,7 +223,7 @@ const getVideoById = async (
       isLiked,
    };
 
-   await redis.setex(cacheKey, 150, JSON.stringify(result));
+   await redis.setex(cacheKey, 60, JSON.stringify(result));
 
    return result;
 };

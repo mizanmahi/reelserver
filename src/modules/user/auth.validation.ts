@@ -9,8 +9,7 @@ const userRegistrationSchema = z.object({
       email: z.string().email('Enter a valid email address.'),
       password: z
          .string()
-         .min(8, 'Password must be at least 8 characters long.')
-         .regex(/[a-zA-Z]/, 'Password must include at least one letter.'),
+         .min(8, 'Password must be at least 8 characters long.'),
    }),
 });
 

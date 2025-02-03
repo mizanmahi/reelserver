@@ -1,42 +1,65 @@
-name: Deploy to EC2
+name: Deploy on EC2
 
 on:
    push:
-      branches:
-         - main
+      branches: ['main']
+   pull_request:
+      branches: ['main']
 
 jobs:
    deploy:
       runs-on: ubuntu-latest
 
       steps:
-         - name: Checkout Repository
-           uses: actions/checkout@v4
+         - uses: actions/checkout@v3
 
-         - name: Deploy to EC2 using Appleboy SSH
-           uses: appleboy/ssh-action@v0.1.10
+         # Configure SSH
+         - name: Configure SSH
+           env:
+              SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+           run: |
+              mkdir -p ~/.ssh
+              echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+              chmod 600 ~/.ssh/id_rsa
+              ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+         # Deploy to EC2 using Docker Compose
+         - name: Deploy to EC2 with Docker Compose
            env:
               EC2_HOST: ${{ secrets.EC2_HOST }}
-           with:
-              host: ${{ secrets.EC2_HOST }}
-              username: ubuntu
-              key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
-              port: 22
-              script: |
-                 cd /home/ubuntu || exit
+              EC2_USER: ${{ secrets.EC2_USER }}
+           run: |
+              # Create deployment directory
+              ssh $EC2_USER@$EC2_HOST "mkdir -p ~/app"
 
-                 # Clone repo if it doesn't exist
-                 if [ ! -d "reelserver" ]; then
-                   git clone https://github.com/mizanmahi/reelserver.git
-                 fi
+              # Copy files to EC2 instance
+              rsync -avz \
+                --exclude='.git' \
+                --exclude='node_modules' \
+                --exclude='.github' \
+                . $EC2_USER@$EC2_HOST:~/app/
 
-                 cd reelserver
-                 git pull origin main
+              # SSH into EC2, pull the latest Docker image and run with Docker Compose
+              ssh $EC2_USER@$EC2_HOST << 'EOF'
+                # Navigate to the app directory
+                cd ~/app
 
-                 # Install dependencies
-                 ssh ubuntu@$EC2_HOST "cd ~/reelserver && export PATH=$PATH:/run/user/1000/fnm_multishells/112424_1734077954807/bin && yarn install --frozen-lockfile
+                # Ensure Docker and Docker Compose are installed
+                if ! command -v docker &> /dev/null; then
+                    echo "Docker not found, installing Docker..."
+                    sudo apt-get update
+                    sudo apt-get install -y docker.io
+                    sudo systemctl start docker
+                    sudo systemctl enable docker
+                fi
 
-                 # Run Docker Compose
-                 ssh ubuntu@$EC2_HOST "cd ~/reelserver && export PATH=$PATH:/run/user/1000/fnm_multishells/112424_1734077954807/bin && docker-compose down
-                 ssh ubuntu@$EC2_HOST "cd ~/reelserver && export PATH=$PATH:/run/user/1000/fnm_multishells/112424_1734077954807/bin && docker-compose up --build -d
-                 ssh ubuntu@$EC2_HOST "cd ~/reelserver && export PATH=$PATH:/run/user/1000/fnm_multishells/112424_1734077954807/bin &&  docker image prune -f
+                if ! command -v docker-compose &> /dev/null; then
+                    echo "Docker Compose not found, installing Docker Compose..."
+                    sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+                    sudo chmod +x /usr/local/bin/docker-compose
+                fi
+
+                # Build and run the app using Docker Compose
+                sudo docker-compose down
+                sudo docker-compose up -d --build
+              EOF

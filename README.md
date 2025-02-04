@@ -1,4 +1,4 @@
-# **ReelServer**
+# **ReelShare Server**
 
 ## _"Your favorite place for sharing and discovering reel videos."_
 

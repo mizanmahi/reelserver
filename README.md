@@ -1,7 +1,5 @@
 # **ReelShare Server**
 
-## _"Your favorite place for sharing and discovering reel videos."_
-
 ---
 
 ## **Table of Contents**
@@ -9,19 +7,24 @@
 1. [Project Description and Features](#project-description-and-features)
 2. [Setup Instructions](#setup-instructions)
 3. [API Documentation](#api-documentation)
-4. [Architecture Diagram](#architecture-diagram)
-5. [Technical Decision Explanation](#technical-decision-explanation)
-6. [Performance Optimization Strategy](#performance-optimization-strategy)
-7. [Deployment Strategy](#deployment-strategy)
-8. [System Design Decisions]
-(#system-design-decisions
-
+4. [Database Design](#database-design)
+5. [Architecture Diagram](#architecture-diagram)
+6. [Technical Decision Explanation](#technical-decision-explanation)
+7. [Performance Optimization Strategy](#performance-optimization-strategy)
+8. [Deployment Strategy](#deployment-strategy)
+9. [System Design Decisions](#system-design-decisions)
+10.   [Possible Improvements](#possible-improvements)
+11.   [Conclusion](#conclusion)
 
 ---
 
 ## **Project Description and Features**
 
-ReelServer is a robust, TypeScript-based backend application designed to handle video processing workflows efficiently. It provides a comprehensive suite of features to manage video uploads, compression, thumbnails, and more, while ensuring security, scalability, and observability.
+ReelShare Server is a high-performance, TypeScript-based backend designed to power a seamless video-sharing platform. It enables users to upload, process, and stream short-form videos efficiently while ensuring security, scalability, and observability.
+
+Built with modern technologies like Node.js, PostgreSQL, Redis, MinIO, and Docker, it provides essential video processing features, including on-the-fly compression, thumbnail extraction, caching, and rate limiting. The backend is optimized for performance with background workers, log rotation, and API monitoring using Prometheus and Grafana.
+
+With a Dockerized architecture and CI/CD deployment on AWS EC2, ReelShare Server ensures reliability and easy scalability. The platform is ideal for video-centric applications, allowing developers to extend and integrate new features effortlessly. 🚀
 
 ### **Key Features**
 
@@ -88,6 +91,68 @@ Explore the API endpoints and test them using the provided Postman documentation
 
 ---
 
+## **Database Design**
+
+The database design consists of three main models: `User`, `Video`, and `Engagement`. Below is an explanation of the relationships between these models, followed by a diagram.
+
+### Relationships
+
+1. **User**:
+
+   -  A `User` can create multiple `Videos` (one-to-many relationship).
+   -  A `User` can engage with multiple `Videos` through the `Engagement` model (many-to-many relationship).
+
+2. **Video**:
+
+   -  A `Video` is uploaded by a single `User` (many-to-one relationship).
+   -  A `Video` can have multiple `Engagements` (one-to-many relationship).
+   -  A `Video` contains metadata (stored as JSON) and engagement metrics like `viewCount` and `likeCount`.
+
+3. **Engagement**:
+   -  The `Engagement` model represents interactions between a `User` and a `Video` (e.g., likes, views, etc.).
+   -  It is a join table that connects `User` and `Video` in a many-to-many relationship.
+   -  Each engagement record is uniquely identified by a composite key (`videoId` and `userId`).
+
+### Diagram
+
+Below is a diagram illustrating the relationships between the `User`, `Video`, and `Engagement` models:
+
+````mermaid
+erDiagram
+    User ||--o{ Video : "uploads"
+    User ||--o{ Engagement : "engages"
+    Video ||--o{ Engagement : "has"
+    User {
+        String id
+        String name
+        String email
+        String contact
+        String password
+        DateTime createdAt
+        DateTime updatedAt
+    }
+    Video {
+        String id
+        String videoUrl
+        String title
+        String description
+        String thumbnail
+        String uploaderId
+        Int viewCount
+        Int likeCount
+        DateTime createdAt
+        DateTime updatedAt
+        Json metadata
+    }
+    Engagement {
+        String videoId
+        String userId
+        DateTime createdAt
+    }
+
+
+---
+
 ## **Architecture Diagram**
 
 Below is a high-level architecture diagram of ReelServer:
@@ -104,7 +169,7 @@ graph TD
     H --> I[Update Cache]
     F -- No --> I
     I --> J[Return Data to Client]
-```
+````
 
 ---
 
@@ -159,7 +224,7 @@ Example:
 -  ❌ `http://localhost:9000/videos/videos/compressed_1738561984341_IMG_2468.mp4`
 -  ✅ `http://serverPublicIp:9000/videos/videos/compressed_1738561984341_IMG_2468.mp4`
 
-For a better experience, clone and run the frontend on your machine using the repository below:
+For a better experience, clone and run both the frontend and backend on your machine. Below is the frontend repo link:
 
 **Frontend Repository:** [Frontend Repo Link](https://github.com/mizanmahi/reelclient.git)
 

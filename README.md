@@ -117,7 +117,7 @@ The database design consists of three main models: `User`, `Video`, and `Engagem
 
 Below is a diagram illustrating the relationships between the `User`, `Video`, and `Engagement` models:
 
-````mermaid
+```mermaid
 erDiagram
     User ||--o{ Video : "uploads"
     User ||--o{ Engagement : "engages"
@@ -149,7 +149,7 @@ erDiagram
         String userId
         DateTime createdAt
     }
-
+```
 
 ---
 
@@ -169,7 +169,7 @@ graph TD
     H --> I[Update Cache]
     F -- No --> I
     I --> J[Return Data to Client]
-````
+```
 
 ---
 

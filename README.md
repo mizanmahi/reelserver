@@ -13,6 +13,9 @@
 5. [Technical Decision Explanation](#technical-decision-explanation)
 6. [Performance Optimization Strategy](#performance-optimization-strategy)
 7. [Deployment Strategy](#deployment-strategy)
+8. [System Design Decisions]
+(#system-design-decisions
+
 
 ---
 

@@ -37,6 +37,7 @@ With a Dockerized architecture and CI/CD deployment on AWS EC2, ReelShare Server
 -  **Caching with Redis**: High-performance caching using Redis to reduce database load and improve response times.
 -  **Rate Limiting**: Built-in rate limiting to prevent abuse and protect against DDoS attacks.
 -  **API Monitoring**: Integrated monitoring using Prometheus and Grafana for real-time performance insights.
+-  **Nginx Reverse Proxy**: Configured Nginx as a reverse proxy to efficiently route incoming requests to the appropriate application containers, ensuring high availability and scalability.
 
 ---
 
@@ -208,12 +209,13 @@ ReelServer is deployed on an EC2 instance using GitHub Actions for CI/CD. Below 
 3. **File Transfer**: The application files are transferred to the EC2 instance using `rsync`.
 4. **Docker Setup**: Ensures Docker and Docker Compose are installed on the EC2 instance.
 5. **Container Management**: Stops existing containers, prunes unused resources, and starts new containers using Docker Compose.
+6. **Nginx Reverse Proxy**: Configures Nginx as a reverse proxy to route incoming traffic on port 80 to the application running in the Docker container.
 
 ### **Accessing the Deployed Server**
 
 The application is deployed at:
 
-**EC2 Instance URL:** `http://54.221.88.24:5000/:500`
+**EC2 Instance URL:** `http://54.221.88.24`
 
 #### **Video Hosting Disclaimer**
 

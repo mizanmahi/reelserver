@@ -215,7 +215,7 @@ ReelServer is deployed on an EC2 instance using GitHub Actions for CI/CD. Below 
 
 The application is deployed at:
 
-**EC2 Instance URL:** `http://54.221.88.24`
+**EC2 Instance URL:** `http://34.201.206.110/`
 
 #### **Video Hosting Disclaimer**
 

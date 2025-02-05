@@ -216,6 +216,7 @@ ReelServer is deployed on an EC2 instance using GitHub Actions for CI/CD. Below 
 The application is deployed at:
 
 **Live URL:** `https://devsskills.com`
+Note: The instance reachability check may fail at any time due to limited resources on free-tier instances.
 
 #### **Video Hosting Disclaimer**
 

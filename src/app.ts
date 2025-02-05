@@ -53,7 +53,7 @@ app.get('/metrics', async (_req, res) => {
 app.get('/', async (req: Request, res: Response) => {
    res.status(200).json({
       success: true,
-      message: 'Server is up an running...!',
+      message: 'Server is up and running...!',
    });
 });
 

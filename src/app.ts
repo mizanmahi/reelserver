@@ -1,4 +1,4 @@
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import express, { Application, Request, Response } from 'express';
 import cookieParser from 'cookie-parser';
 import globalErrorHandler from './middlewares/globalErrorHandler';
@@ -11,8 +11,25 @@ import compress from './middlewares/compression';
 
 const app: Application = express();
 
+const allowedOrigins = [
+   'http://localhost:3000', // Localhost (adjust the port if needed)
+   'https://joyful-pudding-226706.netlify.app', // Netlify deployment URL
+];
+
+// Define CORS options
+const corsOptions: CorsOptions = {
+   origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+         callback(null, true); // Allow requests with no origin or from allowed origins
+      } else {
+         callback(new Error('Not allowed by CORS'));
+      }
+   },
+   credentials: true, // Include credentials (e.g., cookies, authorization headers)
+};
+
 // Middlewares
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

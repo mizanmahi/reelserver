@@ -13,7 +13,7 @@ const app: Application = express();
 
 const allowedOrigins = [
    'http://localhost:3000', // Localhost (adjust the port if needed)
-   'https://joyful-pudding-226706.netlify.app', // Netlify deployment URL
+   'https://reelshareclient.netlify.app', // Netlify deployment URL
 ];
 
 // Define CORS options

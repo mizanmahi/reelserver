@@ -106,7 +106,8 @@ services:
       volumes:
          - .:/reelserver
          - /reelserver/node_modules # Prevents overwriting node_modules
-      command: ['sh', '-c', 'yarn migrate && yarn build && yarn start']
+      command:
+         ['sh', '-c', 'yarn install && yarn migrate && yarn build && yarn dev']
 
 networks:
    app-network:

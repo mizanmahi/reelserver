@@ -6,7 +6,7 @@
    "author": "Mizanur Rahman",
    "license": "MIT",
    "scripts": {
-      "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+      "dev": "ts-node-dev --respawn --transpile-only --poll src/server.ts",
       "start": "node dist/server.js",
       "build": "tsc",
       "migrate": "npx prisma migrate dev",
@@ -30,6 +30,7 @@
       "typescript-eslint": "^8.22.0"
    },
    "dependencies": {
+      "@aws-sdk/client-s3": "^3.744.0",
       "@ffprobe-installer/ffprobe": "^2.1.2",
       "@prisma/client": "^6.2.1",
       "bcrypt": "^5.1.1",

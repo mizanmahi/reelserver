@@ -21,11 +21,7 @@ const uploadVideo = async (
          compressedVideoUrl: videoUrl,
          thumbnailUrl,
          metadata,
-      } = await processVideoUpload(
-         file.buffer,
-         file.originalname,
-         process.env.MINIO_BUCKET_NAME as string
-      );
+      } = await processVideoUpload(file.buffer, file.originalname);
 
       // const videoMetaData = await getVideoMetadata(file.buffer);
 

@@ -1,10 +1,13 @@
 import { Worker } from 'worker_threads';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import minioClient from '../../clients/minio';
+// import minioClient from '../../clients/minio';
 import ffmpeg from 'fluent-ffmpeg';
 import ffmpegPath from 'ffmpeg-static';
 import { writeFileSync, unlinkSync } from 'fs';
+import config from '../../config/config';
+import { PutObjectCommand, PutObjectCommandInput } from '@aws-sdk/client-s3';
+import s3 from '../../clients/s3Client';
 
 if (!ffmpegPath) {
    throw new Error(
@@ -37,11 +40,11 @@ const getVideoDuration = (
 
 export const processVideoUpload = async (
    videoBuffer: Buffer,
-   originalName: string,
-   bucketName: string
+   originalName: string
 ): Promise<{
    compressedVideoUrl: string;
    thumbnailUrl: string;
+
    metadata: ffmpeg.FfprobeData;
 }> => {
    return new Promise((resolve, reject) => {
@@ -63,7 +66,7 @@ export const processVideoUpload = async (
                   reject(new Error('Video duration must not exceed 1 minute.'));
                } else {
                   // Proceed with video processing
-                  const worker = new Worker(join(__dirname, 'videoWorker.js'), {
+                  const worker = new Worker(join(__dirname, 'videoWorker.ts'), {
                      workerData: {
                         videoBuffer,
                         tempVideoPath,
@@ -95,31 +98,54 @@ export const processVideoUpload = async (
 
                            // Upload compressed video to MinIO
                            const compressedVideoKey = `videos/compressed_${timestamp}_${originalName}`;
-                           await minioClient.putObject(
-                              bucketName,
-                              compressedVideoKey,
-                              compressedVideoData
-                           );
-                           console.log(
-                              'Compressed video uploaded successfully'
-                           );
+                           const thumbnailKey = `thumbnails/${timestamp}_preview.png`;
+                           // await minioClient.putObject(
+                           //    bucketName,
+                           //    compressedVideoKey,
+                           //    compressedVideoData
+                           // );
 
                            // Upload thumbnail to MinIO
-                           const thumbnailKey = `thumbnails/${timestamp}_preview.png`;
-                           await minioClient.putObject(
-                              bucketName,
-                              thumbnailKey,
-                              thumbnailData
+                           // await minioClient.putObject(
+                           //    bucketName,
+                           //    thumbnailKey,
+                           //    thumbnailData
+                           // );
+
+                           // const compressedVideoUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${compressedVideoKey}`;
+                           // const thumbnailUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${thumbnailKey}`;
+
+                           // config for s3
+                           const videoParams: PutObjectCommandInput = {
+                              Bucket: config.aws.s3_bucket_name,
+                              Key: compressedVideoKey,
+                              Body: compressedVideoData,
+                           };
+
+                           const videoUploadCommand = new PutObjectCommand(
+                              videoParams
                            );
-                           console.log('Thumbnail uploaded successfully');
+                           await s3.send(videoUploadCommand);
+
+                           const url = `https://${config.aws.s3_bucket_name}.s3.${config.aws.s3_region}.amazonaws.com/${videoParams.Key}`;
+
+                           const thumbnailParams: PutObjectCommandInput = {
+                              Bucket: config.aws.s3_bucket_name,
+                              Key: thumbnailKey,
+                              Body: thumbnailData,
+                           };
+
+                           const thumbnailUploadCommand = new PutObjectCommand(
+                              thumbnailParams
+                           );
+                           await s3.send(thumbnailUploadCommand);
 
                            // Construct public URLs
-                           const compressedVideoUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${compressedVideoKey}`;
-                           const thumbnailUrl = `${process.env.MINIO_PUBLIC_URL}/${bucketName}/${thumbnailKey}`;
+                           const thumbnailUrl = `https://${config.aws.s3_bucket_name}.s3.${config.aws.s3_region}.amazonaws.com/${thumbnailParams.Key}`;
 
                            resolve({
-                              compressedVideoUrl,
-                              thumbnailUrl,
+                              compressedVideoUrl: url,
+                              thumbnailUrl: thumbnailUrl,
                               metadata,
                            });
                         } catch (error) {

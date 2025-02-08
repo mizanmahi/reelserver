@@ -4,8 +4,8 @@ import cookieParser from 'cookie-parser';
 import globalErrorHandler from './middlewares/globalErrorHandler';
 import logRequest from './middlewares/logger';
 import { limiter } from './middlewares/rateLimiter';
-import { register } from './clients/prom';
-import { trackHttpMetrics } from './middlewares/metrics';
+// import { register } from './clients/prom';
+// import { trackHttpMetrics } from './middlewares/metrics';
 import router from './routes';
 import compress from './middlewares/compression';
 
@@ -38,16 +38,16 @@ app.use(cookieParser());
 app.use('/api/v1', logRequest);
 // user rate limiter to all the routes starting with /api/v1
 app.use('/api/v1', limiter);
-app.use(trackHttpMetrics);
+// app.use(trackHttpMetrics);
 app.use(compress);
 
 app.use('/api/v1', router);
 
 // routes for metrics
-app.get('/metrics', async (_req, res) => {
-   res.set('Content-Type', register.contentType);
-   res.end(await register.metrics());
-});
+// app.get('/metrics', async (_req, res) => {
+//    res.set('Content-Type', register.contentType);
+//    res.end(await register.metrics());
+// });
 
 // root route
 app.get('/', async (req: Request, res: Response) => {

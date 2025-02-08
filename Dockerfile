@@ -17,5 +17,7 @@ COPY . .
 
 EXPOSE 5000
 
-
-CMD ["sh", "-c", "yarn migrate && yarn build && yarn start"]
+# for production 
+# CMD ["sh", "-c", "yarn migrate && yarn build && yarn start"] 
+#for development
+CMD ["sh", "-c", "yarn migrate && yarn dev"] 

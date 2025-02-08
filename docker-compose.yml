@@ -21,26 +21,26 @@ services:
          timeout: 5s
          retries: 5
 
-   minio:
-      image: quay.io/minio/minio
-      container_name: minio1
-      restart: always
-      environment:
-         MINIO_ROOT_USER: 'mizan'
-         MINIO_ROOT_PASSWORD: 'mizanmahi'
-      ports:
-         - '9000:9000'
-         - '9001:9001'
-      volumes:
-         - minio_data:/data
-      command: ['server', '/data', '--console-address', ':9001']
-      networks:
-         - app-network
-      healthcheck:
-         test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
-         interval: 10s
-         timeout: 5s
-         retries: 10
+   # minio:
+   #    image: quay.io/minio/minio
+   #    container_name: minio1
+   #    restart: always
+   #    environment:
+   #       MINIO_ROOT_USER: 'mizan'
+   #       MINIO_ROOT_PASSWORD: 'mizanmahi'
+   #    ports:
+   #       - '9000:9000'
+   #       - '9001:9001'
+   #    volumes:
+   #       - minio_data:/data
+   #    command: ['server', '/data', '--console-address', ':9001']
+   #    networks:
+   #       - app-network
+   #    healthcheck:
+   #       test: ['CMD', 'curl', '-f', 'http://localhost:9000/minio/health/live']
+   #       interval: 10s
+   #       timeout: 5s
+   #       retries: 10
 
    redis-stack:
       image: redis/redis-stack:latest
@@ -87,8 +87,8 @@ services:
       depends_on:
          postgres:
             condition: service_healthy
-         minio:
-            condition: service_healthy
+         # minio:
+         #    condition: service_healthy
          redis-stack:
             condition: service_healthy
          # prometheus:

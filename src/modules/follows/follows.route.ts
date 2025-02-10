@@ -4,6 +4,6 @@ import { FollowsController } from './follows.controller';
 
 const router = express.Router();
 
-router.get('/', auth, FollowsController.toggleFollow);
+router.post('/:followsId', auth, FollowsController.toggleFollow);
 
 export const followsRoutes = router;

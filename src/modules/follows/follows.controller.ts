@@ -4,12 +4,16 @@ import catchAsync from '../../utils/catchAsync';
 import { FollowsService } from './follows.service';
 
 const toggleFollow = catchAsync(async (req: Request, res: Response) => {
-   const result = await FollowsService.toggleFollow(req.user);
+   const { followsId } = req.params;
+   const { isFollowed } = await FollowsService.toggleFollow(
+      req.user,
+      followsId
+   );
    sendResponse(res, {
       statusCode: 201,
       success: true,
-      message: 'Followed successfully',
-      data: result,
+      message: `${isFollowed ? 'Followed' : 'un-followed'} successfully`,
+      data: null,
    });
 });
 

@@ -92,16 +92,27 @@ const getUserProfileStats = async (authUser: JwtPayload): Promise<any> => {
       // user info
       const profile = await prisma.user.findUniqueOrThrow({
          where: {
-            id,
-         },
-         select: {
-            id: true,
-            name: true,
-            email: true,
-            contact: true,
-            createdAt: true,
+            id, // The user ID you want to query
          },
       });
+
+      const followers = await prisma.follows.findMany({
+         where: {
+            followingId: profile.id,
+         },
+
+         include: {
+            followedBy: {
+               select: {
+                  id: true,
+                  name: true,
+                  email: true,
+               },
+            },
+         },
+      });
+
+      console.log(profile);
 
       // Prepare the response
       const statistics = {
@@ -123,7 +134,7 @@ const getUserProfileStats = async (authUser: JwtPayload): Promise<any> => {
          totalEngagements,
          engagementBreakdown,
          topVideos,
-         profile,
+         profile: { ...profile, followers },
       };
 
       return statistics;

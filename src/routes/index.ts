@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authRoutes } from '../modules/auth/auth.routes';
 import { videoRoutes } from '../modules/video/video.routes';
 import { statisticsRoutes } from '../modules/statistics/statistics.routes';
+import { followsRoutes } from '../modules/follows/follows.route';
 
 const router = Router();
 
@@ -13,6 +14,10 @@ const appRoutes = [
    {
       path: '/auth',
       route: authRoutes,
+   },
+   {
+      path: '/follows',
+      route: followsRoutes,
    },
    {
       path: '/statistics',

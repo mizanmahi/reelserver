@@ -6,4 +6,6 @@ model Follows {
   createdAt    DateTime @default(now())
 
   @@id([followingId, followedById])
+  @@index([followedById])
+  @@index([followingId])
 }

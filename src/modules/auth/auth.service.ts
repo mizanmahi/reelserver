@@ -47,8 +47,7 @@ const loginUser = async (payload: ILoginUser): Promise<ILoginUserResponse> => {
       },
    });
 
-   if (!user)
-      throw new HttpError(StatusCodes.BAD_REQUEST, 'Invalid credentials!');
+   if (!user) throw new HttpError(StatusCodes.NOT_FOUND, 'No such user');
 
    const isPasswordValid = await comparePasswords(password, user.password);
    if (!isPasswordValid)

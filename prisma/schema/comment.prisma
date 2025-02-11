@@ -4,10 +4,10 @@ model Comment {
     createdAt       DateTime  @default(now())
     updatedAt       DateTime
     userId          String
-    user            User      @relation(fields: [userId], references: [id])
+    user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
     videoId         String
-    video           Video     @relation(fields: [videoId], references: [id])
+    video           Video     @relation(fields: [videoId], references: [id], onDelete: Cascade)
     parentCommentId String?
-    parentComment   Comment?  @relation("commentToComment", fields: [parentCommentId], references: [id])
+    parentComment   Comment?  @relation("commentToComment", fields: [parentCommentId], references: [id], onDelete: Cascade)
     parentComments  Comment[] @relation("commentToComment")
 }

@@ -1,0 +1,13 @@
+model Comment {
+    id              String    @id @default(uuid())
+    content         String
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime
+    userId          String
+    user            User      @relation(fields: [userId], references: [id])
+    videoId         String
+    video           Video     @relation(fields: [videoId], references: [id])
+    parentCommentId String?
+    parentComment   Comment?  @relation("commentToComment", fields: [parentCommentId], references: [id])
+    parentComments  Comment[] @relation("commentToComment")
+}

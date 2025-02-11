@@ -12,4 +12,5 @@ model Video {
     updatedAt   DateTime     @updatedAt
     metadata    Json?
     Engagement  Engagement[]
+    comments    Comment[]
 }

@@ -1,0 +1,32 @@
+model Comment {
+    id              String        @id @default(uuid())
+    content         String        @db.VarChar(1000)
+    createdAt       DateTime      @default(now())
+    updatedAt       DateTime      @updatedAt
+    userId          String
+    user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+    videoId         String
+    video           Video         @relation(fields: [videoId], references: [id], onDelete: Cascade)
+    parentCommentId String?
+    parentComment   Comment?      @relation("commentToComment", fields: [parentCommentId], references: [id], onDelete: Cascade)
+    parentComments  Comment[]     @relation("commentToComment")
+    commentLikes    CommentLike[]
+
+    @@index([userId])
+    @@index([videoId])
+    @@index([parentCommentId])
+}
+
+model CommentLike {
+    id        String  @id @default(uuid())
+    userId    String
+    user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+    commentId String
+    comment   Comment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+    createdAt DateTime @default(now())
+
+    @@unique([userId, commentId])
+    @@index([userId])
+    @@index([commentId])
+}

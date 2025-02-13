@@ -3,17 +3,21 @@ import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { CommentService } from './comment.service';
 
-const commentOnPost = catchAsync(async (req: Request, res: Response) => {
-   const { postId } = req.params;
-   await CommentService.commentOnPost(req.user, postId);
+const commentOnComment = catchAsync(async (req: Request, res: Response) => {
+   const { commentId } = req.params;
+   const result = await CommentService.commentOnComment(
+      commentId,
+      req.body,
+      req.user
+   );
    sendResponse(res, {
       statusCode: 201,
       success: true,
-      message: `Commented successfully`,
-      data: null,
+      message: `Comment fetched successfully`,
+      data: result,
    });
 });
 
 export const CommentController = {
-   commentOnPost,
+   commentOnComment,
 };

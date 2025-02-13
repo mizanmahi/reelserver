@@ -303,10 +303,67 @@ const commentOnVideo = async (
    return result;
 };
 
+// only the top level comments
+const getAllCommentOfAVideo = async (
+   videoId: string,
+   query: Record<string, unknown>
+) => {
+   const page = parseInt(query.page as string) || 1;
+   const limit = parseInt(query.limit as string) || 10;
+   const skip = (page - 1) * limit;
+
+   const where = {
+      videoId,
+      parentCommentId: null,
+   };
+
+   const comments = await prisma.comment.findMany({
+      where,
+      take: limit,
+      skip,
+      orderBy: {
+         createdAt: 'desc',
+      },
+      include: {
+         user: {
+            select: {
+               id: true,
+               name: true,
+            },
+         },
+         _count: {
+            select: {
+               commentLikes: true,
+               parentComments: true,
+            },
+         },
+      },
+   });
+
+   const total = await prisma.comment.count({ where });
+
+   return {
+      meta: {
+         page,
+         limit,
+         total,
+         hasNextPage: skip + limit < total,
+      },
+      data: comments.map((c) => ({
+         ...c,
+         likeCount: c._count.commentLikes,
+         replyCount: c._count.parentComments,
+         replies: [], // Empty array to be filled on demand
+         hasMoreReplies: c._count.parentComments > 0,
+      })),
+   };
+};
+
 export const VideoService = {
    uploadVideo,
    getAllVideos,
    getVideoById,
    toggleVideoLike,
    commentOnVideo,
+   getAllCommentOfAVideo,
 };

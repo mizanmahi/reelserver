@@ -17,6 +17,7 @@ router.post(
 );
 router.get('/', VideoController.getAllVideos);
 router.get('/:id', VideoController.getVideoById);
+router.get('/:id/comments', VideoController.getAllCommentOfAVideo);
 router.get('/:id/:userId', VideoController.getVideoById);
 router.post('/:id', auth, VideoController.toggleVideoLike);
 router.post(

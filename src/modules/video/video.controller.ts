@@ -79,6 +79,24 @@ const commentOnVideo = catchAsync(async (req: Request, res: Response) => {
       data: result,
    });
 });
+const getAllCommentOfAVideo = catchAsync(
+   async (req: Request, res: Response) => {
+      const { id } = req.params;
+
+      const { data, meta } = await VideoService.getAllCommentOfAVideo(
+         id,
+         req.query
+      );
+
+      sendResponse(res, {
+         statusCode: 200,
+         success: true,
+         message: `Comment fetched successfully`,
+         meta: meta,
+         data: data,
+      });
+   }
+);
 
 export const VideoController = {
    uploadVideo,
@@ -86,4 +104,5 @@ export const VideoController = {
    getVideoById,
    toggleVideoLike,
    commentOnVideo,
+   getAllCommentOfAVideo,
 };

@@ -303,10 +303,39 @@ const commentOnVideo = async (
    return result;
 };
 
+const getAllCommentOfAVideo = async (
+   videoId: string,
+   query: Record<string, unknown>
+) => {
+   const page = parseInt(query.page as string) || 1;
+   const limit = parseInt(query.limit as string) || 10;
+   const skip = (page - 1) * limit;
+
+   const result = await prisma.comment.findMany({
+      where: {
+         videoId,
+      },
+      take: limit,
+      skip,
+   });
+
+   const count = await prisma.comment.count();
+
+   return {
+      meta: {
+         page,
+         limit,
+         total: count,
+      },
+      data: result,
+   };
+};
+
 export const VideoService = {
    uploadVideo,
    getAllVideos,
    getVideoById,
    toggleVideoLike,
    commentOnVideo,
+   getAllCommentOfAVideo,
 };

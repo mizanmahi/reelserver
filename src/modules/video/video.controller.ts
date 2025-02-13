@@ -67,9 +67,23 @@ const toggleVideoLike = catchAsync(async (req: Request, res: Response) => {
    });
 });
 
+const commentOnVideo = catchAsync(async (req: Request, res: Response) => {
+   const { id } = req.params;
+
+   const result = await VideoService.commentOnVideo(id, req.body, req.user);
+
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Commented successfully`,
+      data: result,
+   });
+});
+
 export const VideoController = {
    uploadVideo,
    getAllVideos,
    getVideoById,
    toggleVideoLike,
+   commentOnVideo,
 };

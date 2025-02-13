@@ -6,6 +6,7 @@ import redis from '../../clients/redis';
 
 import { prisma } from '../../database/database';
 import logger from '../../logger/logger';
+import HttpError from '../../errorHandlers/HttpError';
 
 const uploadVideo = async (
    file: File,
@@ -273,9 +274,39 @@ const toggleVideoLike = async (videoId: string, authUser: JwtPayload) => {
    });
 };
 
+const commentOnVideo = async (
+   videoId: string,
+   payload: { content: string },
+   authUser: JwtPayload
+) => {
+   const [user, video] = await prisma.$transaction([
+      prisma.user.findUnique({ where: { id: authUser.id } }),
+      prisma.video.findUnique({ where: { id: videoId } }),
+   ]);
+
+   if (!user) {
+      throw new HttpError(404, 'User not found');
+   }
+
+   if (!video) {
+      throw new HttpError(404, 'Video not found');
+   }
+
+   const result = await prisma.comment.create({
+      data: {
+         content: payload.content,
+         userId: authUser.id,
+         videoId,
+      },
+   });
+
+   return result;
+};
+
 export const VideoService = {
    uploadVideo,
    getAllVideos,
    getVideoById,
    toggleVideoLike,
+   commentOnVideo,
 };

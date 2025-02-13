@@ -3,6 +3,7 @@ import { authRoutes } from '../modules/auth/auth.routes';
 import { videoRoutes } from '../modules/video/video.routes';
 import { statisticsRoutes } from '../modules/statistics/statistics.routes';
 import { followsRoutes } from '../modules/follows/follows.route';
+import { commentRoutes } from '../modules/comment/comment.route';
 
 const router = Router();
 
@@ -18,6 +19,10 @@ const appRoutes = [
    {
       path: '/follows',
       route: followsRoutes,
+   },
+   {
+      path: '/comment',
+      route: commentRoutes,
    },
    {
       path: '/statistics',

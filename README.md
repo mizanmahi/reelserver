@@ -181,7 +181,7 @@ graph TD
 3. **PostgreSQL**: Selected for its reliability, robustness, and support for complex queries. It is well-suited for handling structured data like user information, video metadata, engagements and logs.
 4. **FFmpeg for Video Processing**: Used for video compression and thumbnail extraction due to its versatility, performance, and wide support for various video formats and codecs.
 5. **Redis for Caching**: Enhances performance by reducing database load for frequently accessed data.
-6. **MinIO for Storage**: Offers an S3-compatible object storage solution, ideal for handling large video files.
+6. **Aws s3 for Storage**: Offers an S3-compatible object storage solution, ideal for handling large video files.
 7. **Prometheus and Grafana**: Provides robust monitoring and visualization capabilities for API performance and health.
 8. **Docker and Docker Compose**: Simplifies deployment and ensures consistency across development, testing, and production environments.
 

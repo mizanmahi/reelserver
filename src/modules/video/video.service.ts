@@ -359,6 +359,64 @@ const getAllCommentOfAVideo = async (
    };
 };
 
+// GET /api/comments/:commentId/replies
+const getCommentReplies = async (
+   commentId: string,
+   query: Record<string, unknown>
+) => {
+   const page = Number(query.page) || 1;
+   const limit = Math.min(Number(query.limit) || 5, 50);
+   const skip = (page - 1) * limit;
+
+   const where = {
+      parentCommentId: commentId,
+   };
+
+   const [replies, total] = await Promise.all([
+      prisma.comment.findMany({
+         where,
+         skip,
+         take: limit,
+         orderBy: { createdAt: 'asc' },
+         select: {
+            id: true,
+            content: true,
+            createdAt: true,
+            updatedAt: true,
+            user: {
+               select: {
+                  id: true,
+                  name: true,
+               },
+            },
+            _count: {
+               select: {
+                  commentLikes: true,
+                  parentComments: true,
+               },
+            },
+         },
+      }),
+      prisma.comment.count({ where }),
+   ]);
+
+   return {
+      meta: {
+         page,
+         limit,
+         total,
+         hasNextPage: skip + limit < total,
+      },
+      data: replies.map((r) => ({
+         ...r,
+         likeCount: r._count.commentLikes,
+         replyCount: r._count.parentComments,
+         replies: [], // Next level replies
+         hasMoreReplies: r._count.parentComments > 0,
+      })),
+   };
+};
+
 export const VideoService = {
    uploadVideo,
    getAllVideos,
@@ -366,4 +424,5 @@ export const VideoService = {
    toggleVideoLike,
    commentOnVideo,
    getAllCommentOfAVideo,
+   getCommentReplies,
 };

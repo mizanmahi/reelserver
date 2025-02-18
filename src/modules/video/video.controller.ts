@@ -41,7 +41,7 @@ const getVideoById = catchAsync(async (req: Request, res: Response) => {
    } = req;
 
    const deviceKey = generateDeviceKey(req);
-   console.log('User id in controller', userId);
+   console.log('User id in controller:', userId);
 
    const result = await VideoService.getVideoById(deviceKey, id, userId);
    sendResponse(res, {
@@ -97,6 +97,23 @@ const getAllCommentOfAVideo = catchAsync(
       });
    }
 );
+const getCommentReplies = catchAsync(async (req: Request, res: Response) => {
+   const { parentCommentId } = req.params;
+   console.log('comes here');
+
+   const { data, meta } = await VideoService.getCommentReplies(
+      parentCommentId,
+      req.query
+   );
+
+   sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Comment fetched successfully`,
+      meta: meta,
+      data: data,
+   });
+});
 
 export const VideoController = {
    uploadVideo,
@@ -105,4 +122,5 @@ export const VideoController = {
    toggleVideoLike,
    commentOnVideo,
    getAllCommentOfAVideo,
+   getCommentReplies,
 };

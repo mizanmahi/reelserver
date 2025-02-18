@@ -16,6 +16,11 @@ router.post(
    VideoController.uploadVideo
 );
 router.get('/', VideoController.getAllVideos);
+router.get(
+   '/:parentCommentId/replies',
+   auth,
+   VideoController.getCommentReplies
+);
 router.get('/:id', VideoController.getVideoById);
 router.get('/:id/comments', VideoController.getAllCommentOfAVideo);
 router.get('/:id/:userId', VideoController.getVideoById);

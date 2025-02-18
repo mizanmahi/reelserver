@@ -13,7 +13,7 @@ const commentOnComment = catchAsync(async (req: Request, res: Response) => {
    sendResponse(res, {
       statusCode: 201,
       success: true,
-      message: `Comment fetched successfully`,
+      message: `Replied successfully`,
       data: result,
    });
 });

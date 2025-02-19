@@ -127,7 +127,7 @@ The database design consists of three main models: `User`, `Video`, and `Engagem
 
 Below is a diagram illustrating the relationships between the `User`, `Video`, and `Engagement` models:
 
-```
+```mermaid
 erDiagram
     User ||--o{ Video : "uploads"
     User ||--o{ Engagement : "engages"
@@ -167,7 +167,7 @@ erDiagram
 
 Below is a high-level architecture diagram of ReelServer:
 
-```
+```mermaid
 graph TD
     A[Client Request] --> B[Node.js Server]
     B --> C{Cache Check}

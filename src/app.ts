@@ -12,7 +12,7 @@ import compress from './middlewares/compression';
 const app: Application = express();
 
 const allowedOrigins = [
-   'http://localhost:3000', // Localhost (adjust the port if needed)
+   'http://localhost:4000', // Localhost (adjust the port if needed)
    'https://reelshareclient.netlify.app', // Netlify deployment URL
 ];
 

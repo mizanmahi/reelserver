@@ -43,12 +43,12 @@ services:
    #       retries: 10
 
    redis-stack:
-      image: redis/redis-stack:latest
+      image: redis:latest
       container_name: redis-stack
       restart: always
-      ports:
-         - '6379:6379'
-         - '8001:8001'
+      # ports:
+      # - '6379:6379'
+      # - '8001:8001'
       networks:
          - app-network
       healthcheck:
